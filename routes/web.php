@@ -1,18 +1,28 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Gallery\GalleryController;
+use App\Models\GalleryItem;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
+// 1. Маршрут для Главной страницы ("/")
 Route::get('/', function () {
-    return view('welcome');
-});
+    // Берем 3 последние активные работы для вывода на главной
+    $latest = GalleryItem::where('is_active', true)
+        ->latest('published_at')
+        ->take(3)
+        ->get();
+        
+    // Возвращаем шаблон welcome.blade.php и передаем туда переменную $latest
+    return view('welcome', compact('latest'));
+})->name('home'); // Даем маршруту имя 'home', чтобы потом удобно было на него ссылаться
+
+
+// 2. Маршруты для Галереи (ресурсный контроллер)
+// Эта конструкция автоматически создаст маршруты для всех действий (index, show, create, store и т.д.)
+Route::resource('/gallery', GalleryController::class)->names('gallery');
